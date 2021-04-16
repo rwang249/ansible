@@ -1,0 +1,12 @@
+---
+
+    - name:          Define Vars
+      include_tasks: define_vars.yml
+
+    - name:          Copy AppD Files
+      include_tasks: appd_copy.yml
+      when:	     appd_installed.stat.islnk is not defined
+
+    - name:          Install AppDynamics Machine Agent
+      include_tasks: appd_install.yml
+      when:          appd_installed.stat.islnk is not defined

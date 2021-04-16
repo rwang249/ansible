@@ -1,0 +1,10 @@
+---
+
+    - name: Is AppD already Installed?
+      stat:
+        path: /opt/appdynamics
+      register: appd_installed
+
+    - debug:
+        msg: "Path does not exist"
+      when: appd_installed.stat.islnk is not defined

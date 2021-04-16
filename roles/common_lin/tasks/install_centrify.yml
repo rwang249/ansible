@@ -1,0 +1,23 @@
+- name: install centrify
+  block:
+    - name: install centrify
+      command: /root/agents/centrify_5.5.2/install.sh --std-suite --suite-config /root/agents/centrify_5.5.2/centrify-suite.cfg
+      args:
+        creates: /etc/centrifydc
+
+    - name: check if already joined to the domain
+      command: /usr/bin/adinfo
+      register: adinfo_results
+      failed_when: false
+    - name: display ad join status
+      debug:
+        var: adinfo_results.stdout_lines
+
+    - name: join AD from centrify
+      command: /usr/sbin/adjoin -S blah.com
+      when: adinfo_results.rc == 10
+      register: join_ad
+      retries: 20
+      delay: 60
+      until: join_ad is not failed
+      ignore_errors: yes

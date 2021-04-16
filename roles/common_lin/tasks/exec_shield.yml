@@ -1,0 +1,6 @@
+- name: remove kernel.exec-shield=1
+  lineinfile:
+    state: absent
+    path: /etc/sysctl.conf
+    line: 'kernel.exec-shield=1'
+  tags: sysctl, tuning

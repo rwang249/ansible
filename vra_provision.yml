@@ -1,0 +1,8 @@
+---
+- hosts: windows
+  roles:
+    - common_win
+
+- hosts: linux
+  roles:
+    - common_lin

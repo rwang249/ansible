@@ -1,0 +1,71 @@
+---
+
+    - name: Create appd directory
+      file:
+        path: /opt/appdynamics
+        state: directory
+
+    - name: Copy appd machine agent rpm
+      copy:
+        src: /etc/ansible/roles/appd_prod/files/appdynamics-machine-agent-4.4.3.1214.x86_64.rpm
+        dest: /opt/appdynamics/appdynamics-machine-agent-4.4.3.1214.x86_64.rpm
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Copy machine agent info
+      copy:
+        src: /etc/ansible/roles/appd_prod/files/controller-info.xml
+        dest: /opt/appdynamics/controller-info.xml
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Copy tuxedo monitor zip
+      copy:
+        src: /etc/ansible/roles/appd_prod/files/tuxedomonitor-1.1.3.zip
+        dest: /opt/appdynamics/tuxedomonitor-1.1.3.zip
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Copy network agent rpm
+      copy:
+        src: /etc/ansible/roles/appd_prod/files/appd-netviz-x64-linux-4.4.3.728.rpm
+        dest: /opt/appdynamics/appd-netviz-x64-linux-4.4.3.728.rpm
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Copy app agent files
+      copy:
+        src: /etc/ansible/roles/appd_prod/files/AppServerAgent-4.4.3.23079.zip
+        dest: /opt/appdynamics/AppServerAgent-4.4.3.23079.zip
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Copy apache agent files
+      copy:
+        src: /etc/ansible/roles/appd_prod/files/appdynamics-sdk-native-nativeWebServer-64bit-linux-4.4.0.29501.tar.gz
+        dest: /opt/appdynamics/appdynamics-sdk-native-nativeWebServer-64bit-linux-4.4.0.29501.tar.gz
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Copy IBM app agent files
+      copy:
+        src: /etc/ansible/roles/appd_prod/files/AppServerAgent-ibm-4.4.3.23079.zip
+        dest: /opt/appdynamics/AppServerAgent-ibm-4.4.3.23079.zip
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Copy datapower files
+      copy:
+        src: /etc/ansible/roles/appd_prod/files/datapowermonitor-1.3.7.zip
+        dest: /opt/appdynamics/datapowermonitor-1.3.7.zip
+        owner: root
+        group: root
+        mode: 0644
+

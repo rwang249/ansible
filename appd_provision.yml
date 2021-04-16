@@ -1,0 +1,8 @@
+---
+- hosts: appd_dev
+  roles:
+    - appd_dev
+
+- hosts: appd_prod
+  roles:
+    - appd_prod

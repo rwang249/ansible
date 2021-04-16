@@ -1,0 +1,23 @@
+- name: Copy log insight agent rpm
+  copy:
+    src: /etc/ansible/roles/common_lin/files/VMware-Log-Insight-Agent-4.7.0-9602262.noarch_x.x.x.x.rpm
+    dest: /root/agents/VMware-Log-Insight-Agent-4.7.0-9602262.noarch_x.x.x.x.rpm
+    owner: root
+    group: root
+    mode: 0644
+- name: install liagent
+  yum:
+    name: /root/agents/VMware-Log-Insight-Agent-4.7.0-9602262.noarch_x.x.x.x.rpm
+    state: present
+- name: copy liagent autoconfig file
+  copy:
+    src: /etc/ansible/roles/common_lin/files/liagent.ini
+    dest: /var/lib/loginsight-agent/liagent.ini
+    owner: root
+    group: root
+    mode: 0644
+- name: start liagentd service
+  service:
+    name: liagentd
+    enabled: yes
+    state: started

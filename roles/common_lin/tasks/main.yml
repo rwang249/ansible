@@ -1,0 +1,18 @@
+---
+- setup:
+- import_tasks: exec_shield.yml
+  tags: [ linuxbase ]
+- import_tasks: linux_fw.yml
+  tags: [ linuxbase ]
+- import_tasks: initialize_disk.yml
+  tags: [ linuxbase ]
+- import_tasks: install_centrify.yml
+  tags: [ linuxbase ]
+- import_tasks: setup_katello.yml
+  tags: [ linuxbase ]
+- import_tasks: install_vrli.yml
+  tags: [ linuxbase ]
+- import_tasks: yum_update.yml
+  tags: [ linuxbase ]
+- import_tasks: reboot_server.yml
+  tags: [ linuxbase ]

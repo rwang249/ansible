@@ -1,0 +1,22 @@
+---
+- name: Install appd machine agent rpm
+  yum: 
+    name: /opt/appdynamics/appdynamics-machine-agent-4.4.3.1214.x86_64.rpm
+    state: present
+
+- name: Install machine agent info
+  copy:
+    src: /opt/appdynamics/controller-info.xml
+    dest: /opt/appdynamics/machine-agent/conf/controller-info.xml
+    remote_src: yes
+
+- name: Install network agent rpm
+  yum:
+    name: /opt/appdynamics/appd-netviz-x64-linux-4.4.3.728.rpm
+    state: present
+
+- name: start appd machine-agent service
+  service:
+    name: appdynamics-machine-agent
+    enabled: yes
+    state: started

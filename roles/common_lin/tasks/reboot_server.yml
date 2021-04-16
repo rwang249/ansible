@@ -1,0 +1,4 @@
+- name: Reboot Server
+  reboot:
+    reboot_timeout: 1200
+    pre_reboot_delay: 60

@@ -1,0 +1,276 @@
+- name: set for disk 1
+  set_fact:
+    disk1: "{{ diskgrid[0] }}"
+  when: diskgrid[0] is defined
+  tags: disk-config
+
+- name: set for disk 2
+  set_fact:
+    disk2: "{{ diskgrid[1] }}"
+  when: diskgrid[1] is defined
+  tags: disk-config
+
+- name: set for disk 3
+  set_fact:
+    disk3: "{{ diskgrid[2] }}"
+  when: diskgrid[2] is defined
+  tags: disk-config
+
+- name: set for disk 4
+  set_fact:
+    disk4: "{{ diskgrid[3] }}"
+  when: diskgrid[3] is defined
+  tags: disk-config
+
+- name: set for disk 5
+  set_fact:
+    disk5: "{{ diskgrid[4] }}"
+  when: diskgrid[4] is defined
+  tags: disk-config
+
+- name: Create Mountpoint for Disk 1
+  file:
+    path: "{{ disk1.mountpoint }}"
+    state: directory
+    mode: '0755'
+  when: disk1 is defined and ansible_devices.sdb.partitions == {} and disk1.filesystem != "asm"
+  tags: disk-config
+
+- name: Create Mountpoint for Disk 2
+  file:
+    path: "{{ disk2.mountpoint }}"
+    state: directory
+    mode: '0755'
+  when: disk2 is defined and ansible_devices.sdc.partitions == {} and disk2.filesystem != "asm"
+  tags: disk-config
+
+- name: Create Mountpoint for Disk 3
+  file:
+    path: "{{ disk3.mountpoint }}"
+    state: directory
+    mode: '0755'
+  when: disk3 is defined and ansible_devices.sdd.partitions == {} and disk3.filesystem != "asm"
+  tags: disk-config
+
+- name: Create Mountpoint for Disk 4
+  file:
+    path: "{{ disk4.mountpoint }}"
+    state: directory
+    mode: '0755'
+  when: disk4 is defined and ansible_devices.sde.partitions == {} and disk4.filesystem != "asm"
+  tags: disk-config
+
+- name: Create Mountpoint for Disk 5
+  file:
+    path: "{{ disk5.mountpoint }}"
+    state: directory
+    mode: '0755'
+  when: disk5 is defined and ansible_devices.sdf.partitions == {} and disk5.filesystem != "asm"
+  tags: disk-config
+
+- name: Partition Disk 1
+  shell: echo -e "n\np\n1\n\n\nt\n8e\nw" | sudo fdisk /dev/sdb
+  args:
+    executable: /bin/bash
+  when: disk1 is defined and ansible_devices.sdb.partitions == {} and disk1.filesystem != "asm"
+  tags: disk-config
+
+- name: Partition Disk 2
+  shell: echo -e "n\np\n1\n\n\nt\n8e\nw" | sudo fdisk /dev/sdc
+  args:
+    executable: /bin/bash
+  when: disk2 is defined and ansible_devices.sdc.partitions == {} and disk2.filesystem != "asm"
+  tags: disk-config
+
+- name: Partition Disk 3
+  shell: echo -e "n\np\n1\n\n\nt\n8e\nw" | sudo fdisk /dev/sdd
+  args:
+    executable: /bin/bash
+  when: disk3 is defined and ansible_devices.sdd.partitions == {} and disk3.filesystem != "asm"
+  tags: disk-config
+
+- name: Partition Disk 4
+  shell: echo -e "n\np\n1\n\n\nt\n8e\nw" | sudo fdisk /dev/sde
+  args:
+    executable: /bin/bash
+  when: disk4 is defined and ansible_devices.sde.partitions == {} and disk4.filesystem != "asm"
+  tags: disk-config
+
+- name: Partition Disk 5
+  shell: echo -e "n\np\n1\n\n\nt\n8e\nw" | sudo fdisk /dev/sdf
+  args:
+    executable: /bin/bash
+  when: disk5 is defined and ansible_devices.sdf.partitions == {} and disk5.filesystem != "asm"
+  tags: disk-config
+
+- name: Create Volume Group for Disk 1
+  lvg:
+    vg: vol1_vg
+    pvs: /dev/sdb1
+  when: disk1 is defined and ansible_devices.sdb.partitions == {} and disk1.filesystem != "asm"
+  tags: disk-config
+
+- name: Create Volume Group for Disk 2
+  lvg:
+    vg: vol2_vg
+    pvs: /dev/sdc1
+  when: disk2 is defined and ansible_devices.sdc.partitions == {} and disk2.filesystem != "asm"
+  tags: disk-config
+
+- name: Create Volume Group for Disk 3
+  lvg:
+    vg: vol3_vg
+    pvs: /dev/sdd1
+  when: disk3 is defined and ansible_devices.sdd.partitions == {} and disk3.filesystem != "asm"
+  tags: disk-config
+
+- name: Create Volume Group for Disk 4
+  lvg:
+    vg: vol4_vg
+    pvs: /dev/sde1
+  when: disk4 is defined and ansible_devices.sde.partitions == {} and disk4.filesystem != "asm"
+  tags: disk-config
+
+- name: Create Volume Group for Disk 5
+  lvg:
+    vg: vol5_vg
+    pvs: /dev/sdf1
+  when: disk5 is defined and ansible_devices.sdf.partitions == {} and disk5.filesystem != "asm"
+  tags: disk-config
+  
+- name: Configure Disk 1(if available)
+  lvol:
+    vg: vol1_vg
+    lv: "{{ disk1.label }}"
+    size: 100%FREE 
+  when: disk1 is defined and ansible_devices.sdb.partitions == {} and disk1.filesystem != "asm"
+  tags: disk-config
+
+- name: Configure Disk 2(if available)
+  lvol:
+    vg: vol2_vg
+    lv: "{{ disk2.label }}"
+    size: 100%FREE
+  when: disk2 is defined and ansible_devices.sdc.partitions == {} and disk2.filesystem != "asm"
+  tags: disk-config
+
+- name: Configure Disk 3(if available)
+  lvol:
+    vg: vol3_vg
+    lv: "{{ disk3.label }}"
+    size: 100%FREE
+  when: disk3 is defined and ansible_devices.sdd.partitions == {} and disk3.filesystem != "asm"
+  tags: disk-config
+
+- name: Configure Disk 4(if available)
+  lvol:
+    vg: vol4_vg
+    lv: "{{ disk4.label }}"
+    size: 100%FREE
+  when: disk4 is defined and ansible_devices.sde.partitions == {} and disk4.filesystem != "asm"
+  tags: disk-config
+
+- name: Configure Disk 5(if available)
+  lvol:
+    vg: vol5_vg
+    lv: "{{ disk5.label }}"
+    size: 100%FREE
+  when: disk5 is defined and ansible_devices.sdf.partitions == {} and disk5.filesystem != "asm"
+  tags: disk-config
+
+- name: Format the partition as ext4(disk1)
+  filesystem:
+    fstype: ext4
+    dev: /dev/vol1_vg/{{ disk1.label }}
+  when: disk1 is defined and ansible_devices.sdb.partitions == {} and disk1.filesystem != "asm"
+  tags: disk-config
+
+- name: Format the partition as ext4(disk2)
+  filesystem:
+    fstype: ext4
+    dev: /dev/vol2_vg/{{ disk2.label }}
+  when: disk2 is defined and ansible_devices.sdc.partitions == {} and disk2.filesystem != "asm"
+  tags: disk-config
+
+- name: Format the partition as ext4(disk3)
+  filesystem:
+    fstype: ext4
+    dev: /dev/vol3_vg/{{ disk3.label }}
+  when: disk3 is defined and ansible_devices.sdd.partitions == {} and disk3.filesystem != "asm"
+  tags: disk-config
+
+- name: Format the partition as ext4(disk4)
+  filesystem:
+    fstype: ext4
+    dev: /dev/vol4_vg/{{ disk4.label }}
+  when: disk4 is defined and ansible_devices.sde.partitions == {} and disk4.filesystem != "asm"
+  tags: disk-config
+
+- name: Format the partition as ext4(disk5)
+  filesystem:
+    fstype: ext4
+    dev: /dev/vol5_vg/{{ disk5.label }}
+  when: disk5 is defined and ansible_devices.sdf.partitions == {} and disk5.filesystem != "asm"
+  tags: disk-config
+
+- name: Mount Disk 1
+  mount:
+    path: "{{ disk1.mountpoint }}"
+    src: /dev/mapper/vol1_vg-{{ disk1.label }}
+    fstype: ext4
+    opts: defaults
+    dump: "0"
+    passno: "2"
+    state: mounted
+  when: disk1 is defined and ansible_devices.sdb.partitions == {} and disk1.filesystem != "asm"
+  tags: disk-config
+
+- name: Mount Disk 2
+  mount:
+    path: "{{ disk2.mountpoint }}"
+    src: /dev/mapper/vol2_vg-{{ disk2.label }}
+    fstype: ext4
+    opts: defaults
+    dump: "0"
+    passno: "2"
+    state: mounted
+  when: disk2 is defined and ansible_devices.sdc.partitions == {} and disk2.filesystem != "asm"
+  tags: disk-config
+
+- name: Mount Disk 3
+  mount:
+    path: "{{ disk3.mountpoint }}"
+    src: /dev/mapper/vol3_vg-{{ disk3.label }}
+    fstype: ext4
+    opts: defaults
+    dump: "0"
+    passno: "2"
+    state: mounted
+  when: disk3 is defined and ansible_devices.sdd.partitions == {} and disk3.filesystem != "asm"
+  tags: disk-config
+
+- name: Mount Disk 4
+  mount:
+    path: "{{ disk4.mountpoint }}"
+    src: /dev/mapper/vol4_vg-{{ disk4.label }}
+    fstype: ext4
+    opts: defaults
+    dump: "0"
+    passno: "2"
+    state: mounted
+  when: disk4 is defined and ansible_devices.sde.partitions == {} and disk4.filesystem != "asm"
+  tags: disk-config
+
+- name: Mount Disk 5
+  mount:
+    path: "{{ disk5.mountpoint }}"
+    src: /dev/mapper/vol5_vg-{{ disk5.label }}
+    fstype: ext4
+    opts: defaults
+    dump: "0"
+    passno: "2"
+    state: mounted
+  when: disk5 is defined and ansible_devices.sdf.partitions == {} and disk5.filesystem != "asm"
+  tags: disk-config
+
+

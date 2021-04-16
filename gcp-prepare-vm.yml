@@ -1,0 +1,196 @@
+---
+- hosts: all
+  gather_facts: true
+  tasks:
+    - name: set up dhclient if GCP
+      block:
+        - name: supersede blah.com domain search
+          lineinfile: 
+            path: /etc/dhcp/dhclient.conf
+            mode: u=rw,g=r,o=r
+            state: present
+            owner: root
+            group: root
+            regexp: '^supersede domain-search'
+            line: 'supersede domain-search "blah.com";'
+            create: yes
+          register: dhclient_search_results
+        
+        - name: supersede dns servers
+          lineinfile: 
+            path: /etc/dhcp/dhclient.conf
+            mode: u=rw,g=r,o=r
+            state: present
+            owner: root
+            group: root
+            regexp: '^supersede domain-name-servers'
+            line: 'supersede domain-name-servers x.x.x.x, x.x.x.x, x.x.x.x;'
+            create: yes
+          register: dhclient_dns_results
+        
+        - name: reset dhcp lease if necessary
+          shell: 'dhclient -r -v eth0 ; rm -f /var/lib/dhcp/dhclient.* ; dhclient -v eth0'
+          when: dhclient_search_results.changed or dhclient_dns_results.changed
+      tags: dhclient
+      when: ansible_bios_version == "Google"
+
+    - name: relax requiretty setting for sudo
+      tags: sudo, tuning
+      lineinfile:
+        path: /etc/sudoers
+        regexp: '^Defaults    requiretty'
+        line: 'Defaults    !requiretty'
+      when: ansible_bios_version == "Google"
+
+    - name: remove kernel.exec-shield=1
+      tags: sysctl, tuning
+      lineinfile:
+        state: absent
+        path: /etc/sysctl.conf
+        line: 'kernel.exec-shield=1'
+
+    - name: Display all parameters known for the Foreman host
+      debug:
+        var: foreman_params
+
+    - name: Display OS Major Version
+      debug:
+        msg: "{{ ansible_distribution_major_version }}"
+
+    - name: stop and disable firewalld
+      service:
+        name: firewalld
+        enabled: no
+        state: stopped
+        
+    - name: Copy log insight agent rpm
+      tags: insight
+      copy:
+        src: /etc/ansible/roles/common/files/rh7_svr_provision/VMware-Log-Insight-Agent-4.7.0-9602262.noarch_x.x.x.x.rpm
+        dest: /root/agents/VMware-Log-Insight-Agent-4.7.0-9602262.noarch_x.x.x.x.rpm
+        owner: root
+        group: root
+        mode: u=rw,g=r,o=r
+      when: ansible_bios_version != "Google"
+      
+    - name: install katello
+      tags: katello
+      yum:
+        name: http://satellite.blah.com/pub/katello-ca-consumer-latest.noarch.rpm
+        state: present
+
+    - name: install and configure centrify
+      block:
+        - name: install centrify
+          command: /root/agents/centrify_5.5.2/install.sh --std-suite --suite-config /root/agents/centrify_5.5.2/centrify-suite.cfg
+          # ignore_errors: True
+          args:
+            creates: /etc/centrifydc
+
+        - name: check if already joined to the domain
+          command: /usr/bin/adinfo
+          register: adinfo_results
+          failed_when: false
+        
+        - name: display ad join status
+          debug:
+            var: adinfo_results.stdout_lines
+
+        - name: join AD from centrify
+          command: /usr/sbin/adjoin -S blah.com
+          when: adinfo_results.rc == 10
+      tags: centrify
+
+    - name: register to satellite
+      tags: satellite
+      redhat_subscription:
+        state: present
+        org_id: blah
+        activationkey: "RHEL{{ ansible_distribution_major_version }}"
+
+    - name: install liagent if not CGP
+      block:
+        - name: install liagent
+          yum:
+            name: /root/agents/VMware-Log-Insight-Agent-4.7.0-9602262.noarch_x.x.x.x.rpm
+            state: present
+        - name: copy liagent autoconfig file
+          copy:
+            src: /etc/ansible/roles/common/files/rh7_svr_provision/liagent.ini
+            owner: root
+            group: root
+            mode: 0644
+        - name: start liagentd service
+          service:
+            name: liagentd
+            enabled: yes
+            state: started
+      tags: liagent
+      when: ansible_bios_version != "Google"
+
+    - name: install packages
+      tags: yum
+      yum:
+        name:
+          - katello-agent
+          - puppet
+          - mailx
+
+    - name: insert puppet ca server
+      tags: puppet
+      lineinfile:
+        path: /etc/puppetlabs/puppet/puppet.conf
+        line: ca_server= satellite.blah.com
+        create: yes
+
+    - name: insert puppet server
+      tags: puppet
+      lineinfile:
+        path: /etc/puppetlabs/puppet/puppet.conf
+        line: server= satellite.blah.com
+        create: yes
+
+    - name: start puppet
+      tags: puppet, startpuppet
+      service:
+        name: puppet
+        state: started
+        enabled: yes
+
+    - name: yum update
+      tags: yum
+      yum:
+        name: '*'
+        state: latest
+      notify: reboot
+
+    - name: Create a ext4 filesystem on /dev/sdb
+      tags: disk
+      filesystem:
+        fstype: ext4
+        dev: /dev/sdb
+
+    - name: mount sdb to /u01
+      tags: disk
+      mount:
+        path: /u01
+        src: /dev/sdb
+        fstype: ext4
+        boot: yes
+        state: mounted
+
+    - name: force reboot
+      tags:
+        - reboot
+        - never
+      reboot:
+
+  handlers:
+    - name: restart puppet
+      service:
+        name: puppet
+        state: restarted
+
+    - name: reboot
+      reboot:
+

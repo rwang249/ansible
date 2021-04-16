@@ -1,0 +1,30 @@
+- name: install katello
+  yum:
+    name: http://satellite.blah.com/pub/katello-ca-consumer-latest.noarch.rpm
+    state: present
+- name: register to satellite
+  redhat_subscription:
+    state: present
+    org_id: OMERS
+    activationkey: "RHEL{{ ansible_distribution_major_version }}"
+- name: install packages
+  yum:
+    name:
+      - katello-agent
+      - puppet
+      - mailx
+- name: insert puppet ca server
+  lineinfile:
+    path: /etc/puppetlabs/puppet/puppet.conf
+    line: ca_server = satellite.blah.com
+    create: yes
+- name: insert puppet server
+  lineinfile:
+    path: /etc/puppetlabs/puppet/puppet.conf
+    line: server = satellite.blah.com
+    create: yes
+- name: start puppet
+  service:
+    name: puppet
+    state: started
+    enabled: yes

@@ -1,0 +1,6 @@
+- name: stop and disable firewalld
+  service:
+    name: firewalld
+    enabled: no
+    state: stopped
+  tags: [ networking, security, firewall ]
